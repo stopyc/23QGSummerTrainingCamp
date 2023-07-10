@@ -1,3 +1,0 @@
-
-teststring="0123"
-
