@@ -129,11 +129,19 @@ doc/**/*.pdf
 
 ​	总之，就是让这个文件回到最近一次`git commit`或`git add`时的状态,即用版本库里的版本替换工作区的版本。注意命令中的`--`不能省略
 
-### 1.80	删除文件
+### 1.80	删除文件与将文件从Git的跟踪中移除
 
 ​	作用:没什么用，但是记在这里方面日后记Linux命令
 
 ​	命令形式:git rm 文件名.txt
+
+
+
+​	作用:将某文件从Git的跟踪中移除
+
+​	命令形式:git rm -r --cached &lt;filename>
+
+​	配合.gitignore文件可以让本地库中的某个文件一直不被Git跟踪。*注:在GIt中，若文件名带空格，则输入时需要用'\ '(反斜杠+空格)转义文件名才能被正确识别。*
 
 ## 2.0	分支
 
@@ -194,6 +202,20 @@ doc/**/*.pdf
 ​		2、将解决完冲突的文件加入暂存区(add)；
 
 ​		3、提交到仓库(commit)；
+
+#### 2.52	在IDEA中解决冲突
+
+​	在使用IDEA内置的Git时，若发生Conflict，则会有提示
+
+![conflict appear](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/conflict%20appear.png)
+
+​	若点击`Merge`按钮则会进入手动解决冲突的界面，但IDEA对冲突产生的地方进行了直观地展示并设计了快捷解决的按钮
+
+![solve conflict](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/solve%20conflict.png)
+
+​	当然有时候还是得自己手动更改。
+
+![手动修改](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/%E6%89%8B%E5%8A%A8%E4%BF%AE%E6%94%B9.png)
 
 ### 2.60	工作区的暂存
 
@@ -317,6 +339,16 @@ doc/**/*.pdf
 
 ## 5.0	几个补充要点
 
-​	① 切换分支前要先提交本地的修改。
+1. 切换分支前要先提交本地的修改。
+2.  代码要及时提交(保存)，提交过了就不会丢。
+3. Q: Git因为unrelated history无法merge怎么办?
 
-​	② 代码要及时提交(保存)，提交过了就不会丢。
+​		A:[Git因为unrelated history无法merge的原因是两个仓库不同而导致的，需要在后面加上**–allow-unrelated-histories**进行允许合并，即可解决问题。
+
+例如，你可以使用以下命令来合并远程仓库的master分支到本地仓库的master分支：
+
+```
+git pull origin master --allow-unrelated-histories
+```
+
+​	这个选项可以合并两个独立启动仓库的历史。如果还不能解决问题，就把本地的remote删除，重新git remote add添加远程仓库，再按上面的方法来。
