@@ -177,6 +177,10 @@ doc/**/*.pdf
 
 ​	功能:将一个分支的提交合并到另一个目标分支。必须先切换到目标分支。
 
+![gitmerge](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/gitmerge.png)
+
+​	可以看到merge会将两个分支的==最新提交⑥和⑦==和它们两个分支的==共同祖先③==共同形成一个新的提交，保留了原有分支的结构和时间顺序。这也是部分情况merge时会有`unrelated history`问题的原因。
+
 #### 2.31	合并的快进模式（Fast-forward)
 
 ​	在某些情况下使用git merge命令后会看到Fast-forward信息,这说明这次合并是快进模式,即<u>直接把 **目标分支** 指向 **merge分支** 的当前提交</u>，因此此次合并速度会非常快。
@@ -240,6 +244,16 @@ doc/**/*.pdf
 ​	命令形式:git cherry-pick (--edit) &lt;commit-hash>
 
 ​	功能: 将指定的提交复制到当前分支中(可重新设置提交信息)。
+
+### 2.80	分支的嫁接rebase
+
+​	命令形式:git rebase 分支名
+
+​	功能:将一个分支尾部嫁接到另一个分支头部，以实现另类的“merge”效果。
+
+![gitrebase](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/gitrebase.png)
+
+​	由图可以看到
 
 ## 3.0	Git远程仓库
 
