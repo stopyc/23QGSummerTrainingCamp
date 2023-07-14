@@ -461,7 +461,7 @@
 
   		1. 切换到root用户，执行visudo命令，会自动通过vi编辑器打开：/etc/sudoers
   		2. 在文件的最后添加：`username ALL=(ALL) NOPASSWD: ALL`
-       		1. - 其中最后的NOPASSWD:ALL 表示使用sudo命令，无需输入密码
+  	   		1. - 其中最后的NOPASSWD:ALL 表示使用sudo命令，无需输入密码
   		3. 切换回普通用户，开始sudo
 
 
@@ -679,14 +679,17 @@
 
 ​	语法: `systemctl start | stop | status | enable | disable | restart 服务名`
 
-	- 选项:`start` :启动
-	- `stop`:停止
-	- `status`:查看状态
-	- `enable`:关闭开机自启
-	- `disable`:开启开机自启
-	- `restart`: 重启
+- 选项:`start` :启动
+- `stop`:停止
+- `status`:查看状态
+- `enable`:关闭开机自启
+- `disable`:开启开机自启
+- `restart`: 重启
+- ​	附注: 缩写来源不言自明。
 
-​	附注: 缩写来源不言自明。
+​	功能: 查看Linux系统服务列表
+
+​	语法:`systemctl list-unit-files`
 
 #### 4.21	第三方软件与systemctl
 
@@ -986,13 +989,17 @@ sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 ​	语法:`unzip [-d] 参数`
 
-	- `-d`，指定要解压去的位置，同tar的`-C`选项。默认到同目录下
-	- `参数`,被解压的zip压缩包文件
-	- 附注: 解压时==有同名内容会直接替换！==
+- `-d`，指定要解压去的位置，同tar的`-C`选项。默认到同目录下
+- `参数`,被解压的zip压缩包文件
+- 附注: 解压时==有同名内容会直接替换！==
 
 ## 7.0	软件安装
 
-​	我的Linux虚拟机tomcat用户密码:12345678
+​	我的Linux虚拟机tomcat用户密码:~~12345678~~(实际上我没设密码)
+
+​	`tail -f /export/server/tomcat/logs/catalina.out`可以实时查看Tomcat最新日志信息。
+
+
 
 ## 10.0	快捷键与一些补充内容
 
