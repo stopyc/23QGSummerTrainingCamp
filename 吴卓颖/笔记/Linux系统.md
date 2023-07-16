@@ -999,7 +999,175 @@ sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 ​	`tail -f /export/server/tomcat/logs/catalina.out`可以实时查看Tomcat最新日志信息。
 
+## 8.0	进程
 
+​	程序运行在操作系统中，是被操作系统所管理的。为了管理运行的程序，每一个程序在运行的时候，便被操作系统注册为系统中的一个进程。每一个进程都会被分配一个独有的：进程ID（进程号）
+
+### 8.1	查看进程信息ps
+
+​	功能：查看进程信息
+
+​	语法：`ps -ef`，查看全部进程信息，可以搭配grep做过滤：`ps -ef | grep xxx`
+
+​	选项：`-e`，显示出全部的进程
+
+​	选项：`-f`，以完全格式化的形式展示信息（展示全部信息）
+
+![](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/ps-ef.png)
+
+​	**从左到右分别是：**
+
+- `UID`：进程所属的用户ID
+- `PID`：进程的进程号ID
+- `PPID`：进程的父ID（启动此进程的其它进程）
+- `C`：此进程的CPU占用率（百分比）
+- `STIME`：进程的启动时间
+- `TTY`：启动此进程的终端序号，如显示?，表示非终端启动
+- `TIME`：进程占用CPU的时间
+- `CMD`：进程对应的名称或启动路径或启动命令
+
+### 8.2	关闭进程kill
+
+​	功能:关闭进程
+
+​	语法:`kill [-9] 进程ID`
+
+​	选项：-9，表示强制关闭进程。不使用此选项会向进程发送信号要求其关闭，但是否关闭看进程自身的处理机制。
+
+## 9.0	主机状态和环境变量
+
+### 9.1	查看系统资源占用
+
+​	功能:查看==CPU、内存使用情况==，类似Windows的任务管理器
+
+​	语法:`top`
+
+​	附注: 默认每5秒刷新一次，按q或ctrl + c退出
+
+​	**命令内容详解**:
+
+![top](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/top.png)
+
+​	当top以交互式运行（非-b选项启动），可以用以下交互式命令进行控制。
+
+​	![top选项](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/top%E9%80%89%E9%A1%B9.png)
+
+![top交互式](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/top%E4%BA%A4%E4%BA%92%E5%BC%8F.png)
+
+### 9.2	磁盘信息监控
+
+​	功能：查看硬盘的使用情况
+
+​	语法：`df [-h]`
+
+​	选项：`-h`，以更加人性化的单位显示
+
+### 9.3	CPU和磁盘信息监控
+
+​	功能: 可以使用iostat查看CPU、磁盘的相关信息
+
+​	语法：`iostat [-x] [num1] [num2]`
+
+​	选项：`-x`，显示更多信息
+
+​	num1：数字，刷新间隔，num2：数字，刷新几次
+
+​	红框内是CPU的信息。
+
+![iso](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/iso.png)
+
+​	tps：该设备每秒的传输次数（Indicate the number of transfers per second that were issued to the device.）。"一次传输"意思是"一次I/O请求"。多个逻辑请求可能会被合并为"一次I/O请求"。"一次传输"请求的大小是未知的。
+
+​	`-x`可以显示更多信息:
+
+- rrqm/s： 每秒这个设备相关的读取请求有多少被Merge了（当系统调用需要读取数据的时候，VFS将请求发到各个FS，如果FS发现不同的读取请求读取的是相同Block的数据，FS会将这个请求合并Merge, 提高IO利用率, 避免重复调用）；
+- wrqm/s： 每秒这个设备相关的写入请求有多少被Merge了。
+- rsec/s： 每秒读取的扇区数；sectors
+- wsec/： 每秒写入的扇区数。
+- rKB/s： 每秒发送到设备的读取请求数
+- wKB/s： 每秒发送到设备的写入请求数
+- avgrq-sz  平均请求扇区的大小
+- avgqu-sz  平均请求队列的长度。毫无疑问，队列长度越短越好。  
+- await：  每一个IO请求的处理的平均时间（单位是微秒毫秒）。
+- svctm   表示平均每次设备I/O操作的服务时间（以毫秒为单位）
+- %util：  磁盘利用率
+
+### 9.4	网络状态监控
+
+​	功能: 可以使用sar命令查看网络的相关统计（sar命令非常复杂，这里仅简单用于统计网络）
+
+​	语法：`sar -n DEV num1 num2`
+
+​	选项：`-n`，查看网络，DEV表示查看网络接口
+
+​	num1：刷新间隔（不填就查看一次结束），num2：查看次数（不填无限次数）
+
+![sar](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/sar.png)
+
+​	**信息解读：**
+
+- IFACE 本地网卡接口的名称
+- rxpck/s 每秒钟接受的数据包
+- txpck/s 每秒钟发送的数据包
+- rxKB/S 每秒钟接受的数据包大小，单位为KB
+- txKB/S 每秒钟发送的数据包大小，单位为KB
+- rxcmp/s 每秒钟接受的压缩数据包
+- txcmp/s 每秒钟发送的压缩包
+- rxmcst/s 每秒钟接收的多播数据包
+
+### 9.5 	环境变量
+
+​	环境变量是操作系统（Windows、Linux、Mac）在运行的时候，记录的一些关键性信息，用以辅助系统运行。
+
+​	在Linux系统中执行：`env` 命令即可查看当前系统中记录的环境变量
+
+​	环境变量是一种==KeyValue型结构，即名称和值==，如下图：
+
+![env](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/env.png)
+
+#### 9.51	环境变量:PATH
+
+​	无论当前工作目录是什么，都能执行/usr/bin/cd这个程序，这个就是借助环境变量中：PATH这个项目的值来做到的。
+
+![PATH](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/PATH.png)
+
+​	PATH记录了系统执行**任何命令的搜索路径**。
+
+​	当执行任何命令，都会按照顺序，从上述路径中搜索要执行的程序的本体:
+
+​		比如执行cd命令，就从第二个目录/usr/bin中搜索到了cd命令，并执行。
+
+### 9.6	符号$
+
+​	在Linux系统中，$符号被用于取”变量”的值。环境变量记录的信息，除了给操作系统自己使用外，如果我们想要取用，也可以使用。
+
+​	取得环境变量的值就可以通过语法：$环境变量名 来取得
+
+![$PATH](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/$PATH.png)
+
+​	当和其它内容混合在一起的时候，可以通过{}来标注取的变量是谁
+
+### 9.7	自行设置环境变量
+
+​	Linux环境变量可以用户自行设置，其中分为：
+
+- 临时设置，语法：export 变量名=变量值（某个窗口）
+
+- 永久生效
+
+    - 针对当前用户生效，配置在当前用户的：` ~/.bashrc`文件中
+
+    - 针对所有用户生效，配置在系统的： `/etc/profile`文件中
+
+        并通过语法：source 配置文件，进行立刻生效，或重新登录FinalShell生效
+
+### 9.8	自定义环境变量PATH
+
+​	环境变量PATH这个项目里面记录了==系统执行命令的搜索路径==。这些搜索路径我们也可以自行添加到PATH中去。
+
+​	临时修改PATH：`export PATH=$PATH:/home/用户名/文件夹名 `。
+
+​	或将`export PATH=$PATH:/home/用户名/文件夹名`，填入用户环境变量文件或系统环境变量文件中去
 
 ## 10.0	快捷键与一些补充内容
 
