@@ -1038,6 +1038,238 @@ public class ProjectInterceptor implements HandlerInterceptor {
 
 ##### 	步骤二:在SpringMvcSupport这个配置类中配置拦截器类
 
+​	3.7 基于BIO形式下的文件上传
+
+### 目标
+
+支持任意类型文件形式的上传。
+
+### 客户端开发
+
+```java
+package com.itheima.file;
+
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.Socket;
+
+/**
+    目标：实现客户端上传任意类型的文件数据给服务端保存起来。
+
+ */
+public class Client {
+    public static void main(String[] args) {
+        try(
+                InputStream is = new FileInputStream("C:\\Users\\dlei\\Desktop\\BIO,NIO,AIO\\文件\\java.png");
+        ){
+            //  1、请求与服务端的Socket链接
+            Socket socket = new Socket("127.0.0.1" , 8888);
+            //  2、把字节输出流包装成一个数据输出流
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+            //  3、先发送上传文件的后缀给服务端
+            dos.writeUTF(".png");
+            //  4、把文件数据发送给服务端进行接收
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = is.read(buffer)) > 0 ){
+                dos.write(buffer , 0 , len);
+            }
+            dos.flush();
+            Thread.sleep(10000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 服务端开发
+
+```java
+package com.itheima.file;
+
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+    目标：服务端开发，可以实现接收客户端的任意类型文件，并保存到服务端磁盘。
+ */
+public class Server {
+    public static void main(String[] args) {
+        try{
+            ServerSocket ss = new ServerSocket(8888);
+            while (true){
+                Socket socket = ss.accept();
+                // 交给一个独立的线程来处理与这个客户端的文件通信需求。
+                new ServerReaderThread(socket).start();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+package com.itheima.file;
+
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.UUID;
+
+public class ServerReaderThread extends Thread {
+    private Socket socket;
+    public ServerReaderThread(Socket socket){
+        this.socket = socket;
+    }
+    @Override
+    public void run() {
+        try{
+            // 1、得到一个数据输入流读取客户端发送过来的数据
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            // 2、读取客户端发送过来的文件类型
+            String suffix = dis.readUTF();
+            System.out.println("服务端已经成功接收到了文件类型：" + suffix);
+            // 3、定义一个字节输出管道负责把客户端发来的文件数据写出去
+            OutputStream os = new FileOutputStream("C:\\Users\\dlei\\Desktop\\BIO,NIO,AIO\\文件\\server\\"+
+                    UUID.randomUUID().toString()+suffix);
+            // 4、从数据输入流中读取文件数据，写出到字节输出流中去
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = dis.read(buffer)) > 0){
+                os.write(buffer,0, len);
+            }
+            os.close();
+            System.out.println("服务端接收文件保存成功！");
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 小结
+
+## 3.7 基于BIO形式下的文件上传
+
+### 目标
+
+支持任意类型文件形式的上传。
+
+### 客户端开发
+
+```java
+package com.itheima.file;
+
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.Socket;
+
+/**
+    目标：实现客户端上传任意类型的文件数据给服务端保存起来。
+
+ */
+public class Client {
+    public static void main(String[] args) {
+        try(
+                InputStream is = new FileInputStream("C:\\Users\\dlei\\Desktop\\BIO,NIO,AIO\\文件\\java.png");
+        ){
+            //  1、请求与服务端的Socket链接
+            Socket socket = new Socket("127.0.0.1" , 8888);
+            //  2、把字节输出流包装成一个数据输出流
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+            //  3、先发送上传文件的后缀给服务端
+            dos.writeUTF(".png");
+            //  4、把文件数据发送给服务端进行接收
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = is.read(buffer)) > 0 ){
+                dos.write(buffer , 0 , len);
+            }
+            dos.flush();
+            Thread.sleep(10000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 服务端开发
+
+```java
+package com.itheima.file;
+
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+    目标：服务端开发，可以实现接收客户端的任意类型文件，并保存到服务端磁盘。
+ */
+public class Server {
+    public static void main(String[] args) {
+        try{
+            ServerSocket ss = new ServerSocket(8888);
+            while (true){
+                Socket socket = ss.accept();
+                // 交给一个独立的线程来处理与这个客户端的文件通信需求。
+                new ServerReaderThread(socket).start();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+package com.itheima.file;
+
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.UUID;
+
+public class ServerReaderThread extends Thread {
+    private Socket socket;
+    public ServerReaderThread(Socket socket){
+        this.socket = socket;
+    }
+    @Override
+    public void run() {
+        try{
+            // 1、得到一个数据输入流读取客户端发送过来的数据
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            // 2、读取客户端发送过来的文件类型
+            String suffix = dis.readUTF();
+            System.out.println("服务端已经成功接收到了文件类型：" + suffix);
+            // 3、定义一个字节输出管道负责把客户端发来的文件数据写出去
+            OutputStream os = new FileOutputStream("C:\\Users\\dlei\\Desktop\\BIO,NIO,AIO\\文件\\server\\"+
+                    UUID.randomUUID().toString()+suffix);
+            // 4、从数据输入流中读取文件数据，写出到字节输出流中去
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = dis.read(buffer)) > 0){
+                os.write(buffer,0, len);
+            }
+            os.close();
+            System.out.println("服务端接收文件保存成功！");
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 小结
+
 ​	重写`addInterceptors(InterceptorRegistry registry)`方法(格式和==配置放行静态资源==很像)
 
 ```java
@@ -1072,4 +1304,4 @@ public class SpringMvcConfig{
 
 ##### 	步骤四(可选):简化SpringMvcSupport的编写-->WebMvcConfigurer接口
 
-​	让SpringMvcConfig这个配置类==实现WebMvcConfigurer接口==，将SpringMvcSupport包中的内容移到SpringMvcConfig这个配置类中即可33333333333333。
+​	让SpringMvcConfig这个配置类==实现WebMvcConfigurer接口==，将SpringMvcSupport包中的内容移到SpringMvcConfig这个配置类中即可。
