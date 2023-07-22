@@ -567,7 +567,7 @@ ChannelPipeline pipeline = ch.pipeline();
 
 　　　　　　　　　　![img](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/1010726-20200319191841015-1100058453.png)
 
-- 在第4.2中，如果不希望使用ctx.channel().write，那么需要把outhandler在inhandler之前添加到pipeline（重要），该情况下还使用ctx.channel().write，会触发两次outhandler.write，如下图：
+- 如果不希望使用ctx.channel().write，那么需要把outhandler在inhandler之前添加到pipeline（重要），该情况下还使用ctx.channel().write，会触发两次outhandler.write，如下图：
 
 　　　　　　　![img](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/1010726-20200319192101353-1566080049.png)
 
@@ -583,20 +583,53 @@ ChannelPipeline pipeline = ch.pipeline();
     - 客户端是发起请求再接受数据，先outbound再inbound
     - 服务端则是接受数据再发送信息，先inbound再outbound
 
+### 2.5.6.?	Handler使用的注意要点:lock_with_ink_pen:
 
+在使用Handler的过程中，需要注意：
 
+1. ChannelInboundHandler之间的传递，通过调用 ctx.fireChannelRead(msg) 实现；调用ctx.write(msg) 将传递到ChannelOutboundHandler
+2. ctx.write()方法执行后，需要调用flush()方法才能令它立即执行。
+3. ChannelOutboundHandler要放在ChannelInboundHandler之前注册
+4. Handler的消费处理放在最后一个处理。
+5. ***channelHandlerContext***权限有限。所以ctx.**writeAndFlush**只会从当前的**handler**位置开始，往前找**outbound**执行。
+6. ***pipeline和channel***权限大的多。所以ctx.pipeline().writeAndFlush与ctx.channel().writeAndFlush会从tail的位置开始，往前找**outbound**执行。
 
+#### 2.5.6	ChannelHandlerContext
 
+​	ChannelHandlerContext是一个保存了ChannelHandler在ChannelPipeline中的位置和其他信息的对象，它可以作为channel，handler和pipeline的沟通桥梁。它也可以触发出站操作或传递入站事件。
 
+​	ChannelPipeline并不是直接管理ChannelHandler，而是通过ChannelHandlerContext来间接管理，这一点通过ChannelPipeline的默认实现DefaultChannelPipeline可以看出来。
 
+　　DefaultChannelHandlerContext和DefaultChannelPipeline是ChannelHandlerContext和ChannelPipeline的默认实现，在DefaultPipeline内部DefaultChannelHandlerContext组成了一个双向链表。 我们看下DefaultChannelPipeline的构造函数:
 
+```java
+/**
 
+  * 可以看到,DefaultChinnelPipeline 内部使用了两个特殊的Hander 来表示Handel链的头和尾。
+    */
+     public DefaultChannelPipeline(AbstractChannel channel) {
+      if (channel == null) {
+          throw new NullPointerException("channel");
+      }
+      this.channel = channel;
 
+      TailHandler tailHandler = new TailHandler();
+      tail = new DefaultChannelHandlerContext(this, null, generateName(tailHandler), tailHandler);
 
+      HeadHandler headHandler = new HeadHandler(channel.unsafe());
+      head = new DefaultChannelHandlerContext(this, null, generateName(headHandler), headHandler);
 
+      head.next = tail;
+      tail.prev = head;
+    }
+}
+```
 
+​	所以对于`DefaultChinnelPipeline`，它的Handler头部和尾部的Handler是固定的,我们所添加的Handler是添加在这个头和尾之间的Handler。
 
+ 　　　　　　　![img](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/1010726-20200319193836771-775850137.png)
 
+​	
 
 
 
@@ -659,7 +692,8 @@ ChannelPipeline pipeline = ch.pipeline();
 
 
 
-#### 2.5.9	ChannelPipeline中的channelHandler协作规则
+
+#### 2.5.9	ChannelPipeline中的channelHandler的实例化关系
 
 ```java
  /**
@@ -957,6 +991,24 @@ public DefaultChannelPipeline(AbstractChannel channel) {
 - **ChannelHandlerContext**，用于传输业务数据。
 - **ChannelPipeline**，用于保存处理过程需要用到的`ChannelHandler`和`ChannelHandlerContext`。
 
+​	通常来说, ==**所有的 NIO 的 I/O 操作都是从 Channel 开始的**==，一个 channel 类似于一个 stream。在Netty中,Channel是客户端和服务端建立的一个连接通道。
+
+​	虽然java Stream 和 NIO Channel都是负责I/O操作,但他们还是有许多区别的:
+
+- 我们可以在同一个 Channel 中执行读和写操作, 然而同一个 Stream 仅仅支持读或写。
+- Channel 可以异步地读写, 而 Stream 是阻塞的同步读写。
+- Channel 总是从 Buffer 中读取数据, 或将数据写入到 Buffer 中。
+
+　　几者的关系图如下:
+
+ 　　　　　　　![img](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/1010726-20200319194203708-1495925540.png)
+
+　　==一个Channel==包含==**一个ChannelPipeline**==，==**创建Channel**==时会==自动创建一个ChannelPipeline==，每个Channel都有一个====
+
+====，这关联是永久性的。
+
+　　每一个ChannelPipeline中可以包含多个ChannelHandler。所有ChannelHandler都会顺序加入到ChannelPipeline中,ChannelHandler实例与ChannelPipeline之间的桥梁是ChannelHandlerContext实例。
+
 #### 2.71	Channel 类型
 
 　　除了 TCP 协议以外, Netty 还支持很多其他的连接协议, 并且每种协议还有 NIO(异步 IO) 和 OIO(Old-IO, 即传统的阻塞 IO) 版本的区别. 不同协议不同的阻塞类型的连接都有不同的 Channel 类型与之对应，下面是一些常用的 Channel 类型：
@@ -1110,7 +1162,7 @@ public static void byteBufComposite() {
 
 ![](https://img2020.cnblogs.com/i-beta/1010726/202003/1010726-20200323165555566-240986969.png)
 
-​	Netty默认使用池化byteBuf，如果想要声明不池化的可以使用Unpooled工具类。
+​	Netty默认使用池化byteBuf，如果想要声明不池i8i化的可以使用Unpooled工具类。
 
 ### 3.4	字节级操作
 
