@@ -141,6 +141,10 @@ doc/**/*.pdf
 
 ​	命令形式:git rm -r --cached &lt;filename>
 
+> - 如果你想让Git完全忘记这个文件，即从仓库中删除它，但保留在本地工作目录中，你可以使用`git rm --cached` 命令，这会将文件从索引中移除，但不会删除物理文件
+> - 如果你想让Git暂时忽略这个文件的修改，即不再检测它的状态变化，但仍然保留在仓库中，你可以使用`git update-index --assume-unchanged` 命令，这会将文件标记为不可变的，除非你显式地恢复它
+> - 如果你想让Git永久忽略这个文件的修改，即不再检测它的状态变化，也不再覆盖它的本地修改，但仍然保留在仓库中，你可以使用`git update-index --skip-worktree `命令，这会将文件标记为不可更新的，除非你显式地恢复它。
+
 ​	配合.gitignore文件可以让本地库中的某个文件一直不被Git跟踪。*注:在GIt中，若文件名带空格，则输入时需要用'\ '(反斜杠+空格)转义文件名才能被正确识别。*
 
 ## 2.0	分支
@@ -306,6 +310,12 @@ doc/**/*.pdf
 ​	命令形式:git branch -vv
 
 ​	功能:如题
+
+​	命令形式: git branch -r
+
+​	功能: 查看远程仓库中已有分支。
+
+![gitbranch-r](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/gitbranch-r.png)
 
 #### 3.25	从远程仓库克隆到本地(由上至下)
 
