@@ -1566,27 +1566,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
 }
 ```
 
-修改以后的好处是，MP已经帮我们把业务层的一些基础的增删改查都已经实现了，可以直接进行使用。
+​	修改以后的好处是，==MP已经帮我们把业务层的一些基础的增删改查都已经实现了，可以直接进行使用==。
 
-编写测试类进行测试:
+​	其中比较好用的是==**query()**方法和**update()**方法==。
 
-```java
-@SpringBootTest
-class Mybatisplus04GeneratorApplicationTests {
-
-    private IUserService userService;
-
-    @Test
-    void testFindAll() {
-        List<User> list = userService.list();
-        System.out.println(list);
-    }
-
-}
-```
-
-**注意:**mybatisplus_04_generator项目中对于MyBatis的环境是没有进行配置，如果想要运行，需要提取将配置文件中的内容进行完善后在运行。
-
-思考:在MP封装的Service层都有哪些方法可以用?
-
-查看官方文档:`https://mp.baomidou.com/guide/crud-interface.html`,这些提供的方法大家可以参考官方文档进行学习使用，方法的名称可能有些变化，但是方法对应的参数和返回值基本类似。

@@ -606,9 +606,9 @@ void testSaveUser() throws JsonProcessingException {
 
 ```
 
-​	其实这里用了Jackson包的ObjectMapper()对象去序列化对象，用的也是其的方法反序列号
+- 其实这里用了Jackson包的ObjectMapper()对象去序列化对象，用的也是其的方法反序列号。
+- opsForValue()方法还有两个可选参数以设置存入数据的**==过期时间==**
+    - 也可以单独调用stringRedisTemplare.expire方法设置有效期
 
 
-
-### 
 
