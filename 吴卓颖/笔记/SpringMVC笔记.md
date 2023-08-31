@@ -994,6 +994,8 @@ public class ProjectExceptionAdvice {
 
 ### 8.1	拦截器的基本使用
 
+*不知道放在哪里就放在这了: @RequestHeader("Authorization") String token放在controller的参数中就可以直接获取token了*
+
 ​	拦截器的执行流程:
 
 ![1630679464294](https://mytyporapicute.oss-cn-guangzhou.aliyuncs.com/typoraPics/1630679464294.png)
